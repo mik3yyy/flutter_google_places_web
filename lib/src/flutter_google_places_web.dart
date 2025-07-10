@@ -45,7 +45,7 @@ class FlutterGooglePlacesWeb extends StatefulWidget {
   final String? components;
   final InputDecoration? decoration;
   final bool required;
-  
+
   final TextEditingController? controller;
 
   FlutterGooglePlacesWeb({
@@ -92,14 +92,11 @@ class FlutterGooglePlacesWebState extends State<FlutterGooglePlacesWeb> with Sin
       });
     }
 
-    String baseURL = 'https://maps.googleapis.com/maps/api/place/autocomplete/json';
+    String baseURL = 'https://pinpoint-server.onrender.com/autocomplete';
     String type = 'address';
     String input = Uri.encodeComponent(inputText);
-    if (widget.proxyURL == null) {
-      proxiedURL = '$baseURL?input=$input&key=${widget.apiKey}&type=$type&sessiontoken=$_sessionToken';
-    } else {
-      proxiedURL = '${widget.proxyURL}$baseURL?input=$input&key=${widget.apiKey}&type=$type&sessiontoken=$_sessionToken';
-    }
+    proxiedURL = '$baseURL?input=$input&type=$type&sessiontoken=$_sessionToken';
+
     if (widget.offset == null) {
       offsetURL = proxiedURL;
     } else {
@@ -111,7 +108,11 @@ class FlutterGooglePlacesWebState extends State<FlutterGooglePlacesWeb> with Sin
       componentsURL = offsetURL + '&components=${widget.components}';
     }
     print(componentsURL);
-    final Map<String, dynamic> response = await http.get(Uri.parse('$componentsURL'), headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': 'true', 'Access-Control-Allow-Methods': 'GET,POST,HEAD'}).then((value) => jsonDecode(value.body));
+    final Map<String, dynamic> response = await http.get(Uri.parse('$componentsURL'), headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Allow-Methods': 'GET,POST,HEAD'
+    }).then((value) => jsonDecode(value.body));
     // print(response);
     var predictions = response['predictions'];
     if (predictions != []) {
@@ -218,7 +219,12 @@ class FlutterGooglePlacesWebState extends State<FlutterGooglePlacesWeb> with Sin
                                       )
                                     : ListView(
                                         shrinkWrap: true,
-                                        children: displayedResults.map((Address addressData) => SearchResultsTile(addressData: addressData, callback: selectResult, address: FlutterGooglePlacesWeb.value)).toList(),
+                                        children: displayedResults
+                                            .map((Address addressData) => SearchResultsTile(
+                                                addressData: addressData,
+                                                callback: selectResult,
+                                                address: FlutterGooglePlacesWeb.value))
+                                            .toList(),
                                       ),
                               ),
                               Container(
